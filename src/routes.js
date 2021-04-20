@@ -9,7 +9,8 @@ const profile = {
     "monthly-budget": 3000,
     "hours-per-day": 3,
     "days-per-week": 2,
-    "vacation-per-year": 3
+    "vacation-per-year": 3,
+    "value-hour": 50
 };
 
 const jobs = [
@@ -17,7 +18,7 @@ const jobs = [
     id: 1,
     name: "Nome do job",
     "daily-hours": 2,
-    "total-hours": 10,
+    "total-hours": 1,
     created_at: Date.now()
     },
     {
@@ -29,24 +30,42 @@ const jobs = [
     }
 ];
 
+function remainingDays(job) {
+    const remainingDays = (job["total-hours"] / job["daily-hours"]).toFixed(); // toFixed arredonda o numero para numero sem virgula
+        
+    const createdDate = new Date(job.created_at);
+    const dueDay = createdDate.getDate() + Number(remainingDays);
+    const dueDate = createdDate.setDate(dueDay);
+
+    const timeDiffInMs = dueDate - Date.now();
+    // milissengundos em dias
+    const dayInMs = 1000 * 60 * 60 * 24;
+    const dayDiff = Math.floor(timeDiffInMs / dayInMs);
+
+    return dayDiff;
+}
+
 // request e response
 routes.get('/', (request, response)  => {
+
     //ajustes no job -> calculo do tempo restante
     const updatedJobs = jobs.map((job) =>{
+        const remaining = remainingDays(job);
+        const status = remaining <= 0 ? 'done' : 'progress'
 
-        const remainingDays = (job["total-hours"] / job["daily-hours"]).toFixed(); // toFixed arredonda o numero para numero sem virgula
-        
-        const createdDate = new Date(job.created_at);
-        const dueDay = createdDate.getDate() + Number(remainingDays);
-
-
-        return job;
+        return {
+            ...job,
+            remaining,
+            status,
+            budget: profile["value-hour"] * job["total-hours"]
+        };
     })
 
 
 
-    return response.render(views + "index", { jobs })
+    return response.render(views + "index", { jobs: updatedJobs })
 });
+
 routes.get('/job', (request, response)  => response.render(views + "job"));
 routes.post('/job', (request, response)  => {
     //request.body { name: 'daniel', ..........}
@@ -54,9 +73,9 @@ routes.post('/job', (request, response)  => {
     
     jobs.push({
         id: lastJobId + 1,
-        name: req.body.name,
-        "daily-hours": req.body["daily-hours"],
-        "total-hours": req.body["total-hours"],
+        name: request.body.name,
+        "daily-hours": request.body["daily-hours"],
+        "total-hours": request.body["total-hours"],
         created_at: Date.now()
     });
 
