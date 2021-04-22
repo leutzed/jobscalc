@@ -1,9 +1,9 @@
 {
     "workbench.colorTheme": "Dracula",
     "workbench.iconTheme": "material-icon-theme",
-    "editor.fontSize": 18,
     "editor.fontLigatures": true,
     "editor.fontFamily": "Fira Code",
     "editor.minimap.enabled": false,
-    "tabnine.experimentalAutoImports": true
+    "tabnine.experimentalAutoImports": true,
+    "editor.fontSize": 16
 }
