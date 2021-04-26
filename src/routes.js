@@ -15,13 +15,37 @@ const Profile = {
     },
     
     controllers: {
-        index(require, response) {
+        index(request, response) {
             response.render(views + "profile", { profile: Profile.data })
         },
 
-        update(require, response) {
-            // require.body pega os dados -> definir as semanas de um ano -> remover semanas de ferias
-            // horas trabalhadas por semana -> total de horas tranalhadas por mes
+        update(request, response) {
+            // request.body pega os dados ->  
+            const data = request.body;
+
+            // definir as semanas de um ano            
+            const weeksPerYear = 52;
+
+            // remover semanas de ferias
+            const weeksPerMonth = (weeksPerYear - data["vacation-per-year"]) / 12;
+
+            // horas trabalhadas por semana
+            const weeksTotalHours = data["hours-per-day"] * data["days-per-week"];
+
+            // total de horas tranalhadas por mes
+            const monthlyTotalHours = weeksTotalHours * weeksPerMonth;
+
+            // qual o valor da minha hora
+            const valueHour = data["monthly-budget"] / monthlyTotalHours;
+
+            Profile.data = {
+                ...Profile.data,
+                ...request.body,
+                "value-hour": valueHour
+            };
+
+            return response.redirect('/profile');
+
         }
     }
 };
