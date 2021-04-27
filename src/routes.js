@@ -57,21 +57,21 @@ const Job = {
             name: "Nome do job",
             "daily-hours": 2,
             "total-hours": 1,
-            created_at: Date.now()
+            created_at: Date.now(),
             },
             {
             id: 2,
             name: "Nome do job 2",
             "daily-hours": 3,
             "total-hours": 23,
-            created_at: Date.now()
+            created_at: Date.now(),
             }
     ],
 
     controllers: {
         index(request, response){
             //ajustes no job -> calculo do tempo restante
-            const updatedJobs = Job.data.map((job) =>{
+            const updatedJobs = Job.data.map((job) => {
                 const remaining = Job.services.remainingDays(job);
                 const status = remaining <= 0 ? 'done' : 'progress'
         
@@ -79,7 +79,7 @@ const Job = {
                     ...job,
                     remaining,
                     status,
-                    budget: Profile.data["value-hour"] * job["total-hours"]
+                    budget: Job.services.calculateBudget(job, Profile.data["value-hour"])
                 };
             })
             return response.render(views + "index", { jobs: updatedJobs });
@@ -98,10 +98,46 @@ const Job = {
                 "daily-hours": request.body["daily-hours"],
                 "total-hours": request.body["total-hours"],
                 created_at: Date.now()
-    });
+        });
 
-    return response.redirect('/');
+        return response.redirect('/');
+
         },
+
+        show(request, response){
+            // pega o id da url - esse "id" precisa ser o mesmo nome da rota ex: routes.get('/job/:id', Job.controllers.show);
+            const jobId = request.params.id
+
+            // o find procura dentro de Job.data um "job" (nome que coloquei agora) - o id, e vai me retornar true, se o id achado for igual ao da url que é jobId
+            const job = Job.data.find(job => Number(job.id) === Number(jobId));
+
+            if (!job){
+                return response.redirect('/job')
+            }
+
+            job.budget = Job.services.calculateBudget(job, Profile.data["value-hour"])
+
+            return response.render(views + "job-edit", { job })
+        },
+
+        update(request, response){
+            // pega o id da url - esse "id" precisa ser o mesmo nome da rota ex: routes.get('/job/:id', Job.controllers.show);
+            const jobId = request.params.id
+
+            // o find procura dentro de Job.data um "job" (nome que coloquei agora) - o id, e vai me retornar true, se o id achado for igual ao da url que é jobId
+            const job = Job.data.find(job => Number(job.id) === Number(jobId));
+
+            if (!job){
+                return response.redirect('/job')
+            }
+
+            const updatedJob = {
+                ...job,
+                name: request.body.name,
+                "total-hours": request.body["total-hours"],
+                "daily-hours": request.body["daily-hours"]
+            }
+        }
     },
 
     services: {
@@ -118,7 +154,9 @@ const Job = {
             const dayDiff = Math.floor(timeDiffInMs / dayInMs);
         
             return dayDiff;
-        }
+        },
+        
+        calculateBudget: (job, valueHour) => valueHour * job["total-hours"]
     },
 }
 
@@ -127,7 +165,8 @@ const Job = {
 routes.get('/', Job.controllers.index);
 routes.get('/job', Job.controllers.create);
 routes.post('/job', Job.controllers.save);
-routes.get('/job/edit', (request, response)  => response.render(views + "job-edit"));
+routes.get('/job/:id', Job.controllers.show);
+routes.post('/job/:id', Job.controllers.update);
 routes.get('/profile', Profile.controllers.index);
 routes.post('/profile', Profile.controllers.update);
 
