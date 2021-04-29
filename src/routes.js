@@ -90,7 +90,7 @@ const Job = {
         },
 
         save(request, response){
-            const lastJobId = Job.data[Job.data.length - 1]?.id || 1;
+            const lastJobId = Job.data[Job.data.length - 1]?.id || 0;
     
             Job.data.push({
                 id: lastJobId + 1,
@@ -132,11 +132,30 @@ const Job = {
             }
 
             const updatedJob = {
+                // espalhei o job, ou seja, trouxe todos os dados dos job
                 ...job,
+                // o que vem depois do job, esta sendo sobreescrito naquilo que já veio preenchido
                 name: request.body.name,
                 "total-hours": request.body["total-hours"],
                 "daily-hours": request.body["daily-hours"]
             }
+
+            Job.data = Job.data.map(job => {
+                if(Number(job.id) === Number(jobId)) {
+                    job = updatedJob;
+                }
+                return job;
+            })
+            response.redirect('/job/' + jobId);
+        },
+
+        delete(request, response){
+            const jobId = request.params.id;
+
+            // filter pega todos aqueles e vai tirar do meu retorno
+            Job.data = Job.data.filter(job => Number(job.id) !== Number(jobId))
+
+            return response.redirect('/')
         }
     },
 
@@ -167,6 +186,7 @@ routes.get('/job', Job.controllers.create);
 routes.post('/job', Job.controllers.save);
 routes.get('/job/:id', Job.controllers.show);
 routes.post('/job/:id', Job.controllers.update);
+routes.post('/job/delete/:id', Job.controllers.delete);
 routes.get('/profile', Profile.controllers.index);
 routes.post('/profile', Profile.controllers.update);
 
