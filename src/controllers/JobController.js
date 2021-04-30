@@ -1,17 +1,22 @@
 const Job = require("../model/Job");
+const Profile = require("../model/Profile");
+const JobUtils = require("../utils/jobUtils");
 
 module.exports = {
     index(request, response){
+        const jobs = Job.get();
+        const profile = Profile.get();
+
         //ajustes no job -> calculo do tempo restante
-        const updatedJobs = Job.data.map((job) => {
-            const remaining = Job.services.remainingDays(job);
+        const updatedJobs = jobs.map((job) => {
+            const remaining = JobUtils.remainingDays(job);
             const status = remaining <= 0 ? 'done' : 'progress'
     
             return {
                 ...job,
                 remaining,
                 status,
-                budget: Job.services.calculateBudget(job, Profile.data["value-hour"])
+                budget: JobUtils.calculateBudget(job, profile["value-hour"])
             };
         })
         return response.render("index", { jobs: updatedJobs });
@@ -22,9 +27,10 @@ module.exports = {
     },
 
     save(request, response){
-        const lastJobId = Job.data[Job.data.length - 1]?.id || 0;
+        const jobs = Job.get();
+        const lastJobId = jobs[jobs.length - 1]?.id || 0;
 
-        Job.data.push({
+        jobs.push({
             id: lastJobId + 1,
             name: request.body.name,
             "daily-hours": request.body["daily-hours"],
@@ -37,27 +43,32 @@ module.exports = {
     },
 
     show(request, response){
+        const jobs = Job.get();
+        const profile = Profile.get();
+
         // pega o id da url - esse "id" precisa ser o mesmo nome da rota ex: routes.get('/job/:id', Job.controllers.show);
         const jobId = request.params.id
 
-        // o find procura dentro de Job.data um "job" (nome que coloquei agora) - o id, e vai me retornar true, se o id achado for igual ao da url que é jobId
-        const job = Job.data.find(job => Number(job.id) === Number(jobId));
+        // o find procura dentro de jobs->Job.get um "job" (nome que coloquei agora) - o id, e vai me retornar true, se o id achado for igual ao da url que é jobId
+        const job = jobs.find(job => Number(job.id) === Number(jobId));
 
         if (!job){
             return response.redirect('/job')
         }
 
-        job.budget = Job.services.calculateBudget(job, Profile.data["value-hour"])
+        job.budget = JobUtils.calculateBudget(job, profile["value-hour"])
 
         return response.render("job-edit", { job })
     },
 
     update(request, response){
+        const jobs = Job.get();
+
         // pega o id da url - esse "id" precisa ser o mesmo nome da rota ex: routes.get('/job/:id', Job.controllers.show);
         const jobId = request.params.id
 
-        // o find procura dentro de Job.data um "job" (nome que coloquei agora) - o id, e vai me retornar true, se o id achado for igual ao da url que é jobId
-        const job = Job.data.find(job => Number(job.id) === Number(jobId));
+        // o find procura dentro de jobs um "job" (nome que coloquei agora) - o id, e vai me retornar true, se o id achado for igual ao da url que é jobId
+        const job = jobs.find(job => Number(job.id) === Number(jobId));
 
         if (!job){
             return response.redirect('/job')
@@ -72,7 +83,7 @@ module.exports = {
             "daily-hours": request.body["daily-hours"]
         }
 
-        Job.data = Job.data.map(job => {
+        jobs = jobs.map(job => {
             if(Number(job.id) === Number(jobId)) {
                 job = updatedJob;
             }
@@ -82,10 +93,11 @@ module.exports = {
     },
 
     delete(request, response){
+        const jobs = Job.get();
         const jobId = request.params.id;
 
         // filter pega todos aqueles e vai tirar do meu retorno
-        Job.data = Job.data.filter(job => Number(job.id) !== Number(jobId))
+        jobs = jobs.filter(job => Number(job.id) !== Number(jobId))
 
         return response.redirect('/')
     }
