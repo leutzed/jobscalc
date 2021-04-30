@@ -62,10 +62,9 @@ module.exports = {
     },
 
     update(request, response){
-        const jobs = Job.get();
-
         // pega o id da url - esse "id" precisa ser o mesmo nome da rota ex: routes.get('/job/:id', Job.controllers.show);
-        const jobId = request.params.id
+        const jobId = request.params.id;
+        const jobs = Job.get();
 
         // o find procura dentro de jobs um "job" (nome que coloquei agora) - o id, e vai me retornar true, se o id achado for igual ao da url que é jobId
         const job = jobs.find(job => Number(job.id) === Number(jobId));
@@ -83,21 +82,22 @@ module.exports = {
             "daily-hours": request.body["daily-hours"]
         }
 
-        jobs = jobs.map(job => {
+        const newJobs = jobs.map(job => {
             if(Number(job.id) === Number(jobId)) {
                 job = updatedJob;
             }
             return job;
         })
+
+        Job.update(newJobs);
+
         response.redirect('/job/' + jobId);
     },
 
     delete(request, response){
-        const jobs = Job.get();
         const jobId = request.params.id;
 
-        // filter pega todos aqueles e vai tirar do meu retorno
-        jobs = jobs.filter(job => Number(job.id) !== Number(jobId))
+        Job.delete(jobId);
 
         return response.redirect('/')
     }
