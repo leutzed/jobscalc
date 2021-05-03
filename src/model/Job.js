@@ -24,6 +24,9 @@ module.exports = {
     },
     delete(id){
         // filter pega todos aqueles e vai tirar do meu retorno
-        data = data.filter(job => Number(job.id) !== Number(id))
+        data = data.filter(job => Number(job.id) !== Number(id));
+    },
+    create(newData){
+        data.push(newData);
     }
 }
