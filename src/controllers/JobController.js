@@ -7,12 +7,8 @@ module.exports = {
         return response.render("job");
     },
 
-    save(request, response){
-        const jobs = Job.get();
-        const lastJobId = jobs[jobs.length - 1]?.id || 0;
-
-        Job.create({
-            id: lastJobId + 1,
+    async save(request, response){
+        await Job.create({
             name: request.body.name,
             "daily-hours": request.body["daily-hours"],
             "total-hours": request.body["total-hours"],
@@ -23,9 +19,9 @@ module.exports = {
 
     },
 
-    show(request, response){
-        const jobs = Job.get();
-        const profile = Profile.get();
+    async show(request, response){
+        const jobs = await Job.get();
+        const profile = await Profile.get();
 
         // pega o id da url - esse "id" precisa ser o mesmo nome da rota ex: routes.get('/job/:id', Job.controllers.show);
         const jobId = request.params.id
@@ -42,10 +38,10 @@ module.exports = {
         return response.render("job-edit", { job })
     },
 
-    update(request, response){
+    async update(request, response){
         // pega o id da url - esse "id" precisa ser o mesmo nome da rota ex: routes.get('/job/:id', Job.controllers.show);
         const jobId = request.params.id;
-        const jobs = Job.get();
+        const jobs = await Job.get();
 
         // o find procura dentro de jobs um "job" (nome que coloquei agora) - o id, e vai me retornar true, se o id achado for igual ao da url que é jobId
         const job = jobs.find(job => Number(job.id) === Number(jobId));

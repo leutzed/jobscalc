@@ -41,14 +41,16 @@ const initDb = {
         monthly_budget,
         days_per_week,
         hours_per_day,
-        vacation_per_year
+        vacation_per_year,
+        value_hour
         ) VALUES (
         "Daniel",
         "https://avatars.githubusercontent.com/u/55982817?v=4",
         3000,
         3,
         2,
-        1
+        1,
+        20
     );`);
 
     await db.close();
