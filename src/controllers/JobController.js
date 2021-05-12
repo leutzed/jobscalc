@@ -41,40 +41,23 @@ module.exports = {
     async update(request, response){
         // pega o id da url - esse "id" precisa ser o mesmo nome da rota ex: routes.get('/job/:id', Job.controllers.show);
         const jobId = request.params.id;
-        const jobs = await Job.get();
-
-        // o find procura dentro de jobs um "job" (nome que coloquei agora) - o id, e vai me retornar true, se o id achado for igual ao da url que é jobId
-        const job = jobs.find(job => Number(job.id) === Number(jobId));
-
-        if (!job){
-            return response.redirect('/job')
-        }
 
         const updatedJob = {
-            // espalhei o job, ou seja, trouxe todos os dados dos job
-            ...job,
-            // o que vem depois do job, esta sendo sobreescrito naquilo que já veio preenchido
+            // esta sendo sobreescrito naquilo que já veio preenchido
             name: request.body.name,
             "total-hours": request.body["total-hours"],
             "daily-hours": request.body["daily-hours"]
         }
 
-        const newJobs = jobs.map(job => {
-            if(Number(job.id) === Number(jobId)) {
-                job = updatedJob;
-            }
-            return job;
-        })
-
-        Job.update(newJobs);
+        await Job.update(updatedJob, jobId);
 
         response.redirect('/job/' + jobId);
     },
 
-    delete(request, response){
+    async delete(request, response){
         const jobId = request.params.id;
 
-        Job.delete(jobId);
+        await Job.delete(jobId);
 
         return response.redirect('/')
     }
