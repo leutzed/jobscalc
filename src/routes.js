@@ -1,8 +1,9 @@
-const express = require("express");
-const routes = express.Router();
-const ProfileController = require("./controllers/ProfileController");
-const JobController = require("./controllers/JobController");
-const DashboardController = require("./controllers/DashboardController");
+import { Router } from 'express';
+import ProfileController from './controllers/ProfileController';
+import JobController from './controllers/JobController';
+import DashboardController from './controllers/DashboardController';
+
+const routes = new Router();
 
 // request e response
 routes.get('/', DashboardController.index);
@@ -14,4 +15,4 @@ routes.post('/job/delete/:id', JobController.delete);
 routes.get('/profile', ProfileController.index);
 routes.post('/profile', ProfileController.update);
 
-module.exports = routes;
+export default routes;

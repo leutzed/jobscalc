@@ -1,7 +1,7 @@
-const express = require("express");
+import express from 'express';
+import routes from './routes';
+import path from 'path';
 const server = express();
-const routes = require("./routes");
-const path = require("path");
 
 //usando template engine
 server.set('view engine', 'ejs');

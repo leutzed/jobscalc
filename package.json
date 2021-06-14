@@ -2,7 +2,7 @@
   "name": "maratonadiscover02",
   "version": "1.0.0",
   "description": "Freelance calculator",
-  "main": "src/server.js",
+  "main": "index.js",
   "dependencies": {
     "ejs": "^3.1.6",
     "express": "^4.17.1",
@@ -10,10 +10,11 @@
     "sqlite3": "^5.0.2"
   },
   "devDependencies": {
-    "nodemon": "^2.0.7"
+    "nodemon": "^2.0.7",
+    "sucrase": "^3.18.2"
   },
   "scripts": {
-    "dev": "nodemon .",
+    "dev": "nodemon src/server.js",
     "init-db": "node src/db/init.js"
   },
   "keywords": [],
